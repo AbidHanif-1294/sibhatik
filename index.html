@@ -3,36 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SIBHATIK V3 - Smart Scanner</title>
+    <title>SIBHATIK V3 - Role Based</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     
+    <!-- LIBRARY UNTUK BIKIN QR CODE -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- LIBRARY UNTUK SCAN KAMERA (BARU) -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     
     <style>
-        /* ... (CSS SAMA SEPERTI SEBELUMNYA) ... */
-        :root { --primary: #00A86B; --primary-dark: #008f5a; --bg: #F0F4F8; --white: #ffffff; --text: #1E293B; --gray: #64748B; --danger: #EF4444; --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05); --shadow-md: 0 10px 25px -5px rgba(0, 168, 107, 0.2); }
+        :root {
+            --primary: #00A86B; --primary-dark: #008f5a; --bg: #F0F4F8; --white: #ffffff;
+            --text: #1E293B; --gray: #64748B; --danger: #EF4444;
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 10px 25px -5px rgba(0, 168, 107, 0.2);
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg); color: var(--text); padding-bottom: 90px; overflow-x: hidden; }
+
+        /* --- UTILITY & ANIMASI --- */
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .page { display: none; animation: fadeIn 0.3s ease-out forwards; }
         .page.active { display: block; }
         
-        .toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: white; padding: 12px 20px; border-radius: 50px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 10px; z-index: 9999; transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); border-left: 5px solid var(--primary); min-width: 250px; max-width: 90%; }
+        /* --- CUSTOM TOAST --- */
+        .toast {
+            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
+            background: white; padding: 12px 20px; border-radius: 50px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            display: flex; align-items: center; gap: 10px;
+            z-index: 9999; transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            border-left: 5px solid var(--primary); min-width: 250px; max-width: 90%;
+        }
         .toast.show { top: 20px; }
         .toast.error { border-left-color: var(--danger); }
         .toast-icon { font-size: 24px; color: var(--primary); }
         .toast.error .toast-icon { color: var(--danger); }
         .toast-text { font-size: 14px; font-weight: 600; color: var(--text); }
 
+        /* --- HEADER --- */
         .top-header { background: linear-gradient(135deg, var(--primary), #00C49A); padding: 20px; display: flex; align-items: center; justify-content: space-between; color: white; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; box-shadow: var(--shadow-md); position: sticky; top: 0; z-index: 10; }
         .header-title { display: flex; align-items: center; gap: 15px; font-weight: 800; font-size: 18px; }
         .btn-back { font-size: 24px; cursor: pointer; display: none; }
         .clock-box h3 { font-size: 18px; font-weight: 700; }
         .clock-box p { font-size: 11px; opacity: 0.8; text-align: right; }
 
+        /* --- HOME --- */
         .profile-section { display: flex; align-items: center; gap: 15px; padding: 25px 20px 15px; }
         .avatar { width: 65px; height: 65px; background: linear-gradient(135deg, #E2E8F0, #CBD5E1); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: var(--gray); font-size: 30px; border: 3px solid white; box-shadow: var(--shadow-sm); }
         .profile-text h4 { font-size: 13px; color: var(--gray); font-weight: 500; }
@@ -46,88 +65,131 @@
         .ic-purple { background: #F3E8FF; color: #9333EA; } .ic-orange { background: #FFEDD5; color: #EA580C; } .ic-yellow { background: #FEF3C7; color: #D97706; } .ic-blue { background: #DBEAFE; color: #2563EB; } .ic-green { background: #D1FAE5; color: #059669; }
         .menu-item span { font-size: 10px; font-weight: 700; color: var(--text); text-align: center; line-height: 1.3; }
 
+        /* --- GLOBAL PAGE --- */
         .content-container { padding: 20px; }
         .btn-action { background: var(--primary); color: white; width: 100%; padding: 18px; border-radius: 16px; font-weight: bold; font-size: 16px; border: none; display: flex; justify-content: center; gap: 10px; align-items: center; cursor: pointer; box-shadow: var(--shadow-md); margin-top: 15px; transition: 0.2s;}
         .btn-action:active { transform: scale(0.96); }
         
+        /* --- PRESENSI HARIAN --- */
         .geofence-box { background: white; padding: 20px; border-radius: 20px; box-shadow: var(--shadow-sm); text-align: center; margin-bottom: 20px; border: 2px solid var(--primary); }
-        .loc-status { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 20px; font-weight: 700; font-size: 13px; margin-bottom: 10px; background: #D1FAE5; color: #059669; }
+        .geofence-box.outside { border-color: var(--danger); }
+        .loc-status { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 20px; font-weight: 700; font-size: 13px; margin-bottom: 10px; }
+        .loc-status.inside { background: #D1FAE5; color: #059669; }
+        .loc-status.outside { background: #FEE2E2; color: #DC2626; }
         .big-clock { font-size: 36px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--text); margin: 10px 0; }
         .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .btn-masuk { background: var(--primary); color: white; padding: 18px; border-radius: 16px; font-weight: bold; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; transition: 0.2s;}
+        .btn-masuk:active { transform: scale(0.96); }
         .btn-pulang { background: #F97316; color: white; padding: 18px; border-radius: 16px; font-weight: bold; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; transition: 0.2s;}
+        .btn-pulang:active { transform: scale(0.96); }
         .btn-qr { background: #1E293B; color: white; width: 100%; padding: 18px; border-radius: 16px; font-weight: bold; border: none; display: flex; justify-content: center; gap: 10px; align-items: center; margin-top: 15px; cursor: pointer;}
+        .btn-disabled { opacity: 0.5; pointer-events: none; }
 
+        /* UI Guru (QR Code) */
         .qr-container { background: white; border-radius: 24px; padding: 30px; text-align: center; box-shadow: var(--shadow-sm); border: 1px dashed var(--primary); margin-bottom: 20px; }
+        .qr-container h3 { font-size: 18px; margin-bottom: 5px; color: var(--text); }
+        .qr-container p { font-size: 12px; color: var(--gray); margin-bottom: 20px; }
         .qr-wrapper { background: white; padding: 15px; border-radius: 16px; display: inline-block; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .qr-timer { font-size: 24px; font-weight: 800; color: var(--danger); margin-bottom: 20px; font-variant-numeric: tabular-nums;}
 
-        .event-card { background: white; border-radius: 20px; padding: 20px; margin-bottom: 15px; box-shadow: var(--shadow-sm); border-left: 5px solid var(--primary); }
-        .event-card h3 { font-size: 16px; margin-bottom: 5px; }
+        /* --- KEGIATAN & LAPORAN KEGIATAN --- */
+        .event-card { background: white; border-radius: 20px; padding: 20px; margin-bottom: 15px; box-shadow: var(--shadow-sm); border-left: 5px solid var(--primary); position: relative; overflow: hidden; }
+        .event-badge { position: absolute; top: 15px; right: -25px; background: var(--primary); color: white; font-size: 10px; font-weight: bold; padding: 5px 30px; transform: rotate(45deg); }
+        .event-card h3 { font-size: 16px; margin-bottom: 5px; padding-right: 20px; }
         .event-card p { font-size: 12px; color: var(--gray); margin-bottom: 15px; display: flex; align-items: center; gap: 5px;}
-        .btn-small { background: rgba(0, 168, 107, 0.1); color: var(--primary); padding: 12px; border-radius: 10px; font-weight: 700; font-size: 13px; border: none; cursor: pointer; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .btn-small { background: rgba(0, 168, 107, 0.1); color: var(--primary); padding: 12px; border-radius: 10px; font-weight: 700; font-size: 13px; border: none; cursor: pointer; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; transition: 0.2s;}
+        .btn-small:active { transform: scale(0.95); }
 
         .history-card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); }
         .status-badge { padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; }
-        .bg-green { background: #D1FAE5; color: #059669; }
+        .bg-green { background: #D1FAE5; color: #059669; } .bg-orange { background: #FFEDD5; color: #EA580C; } .bg-red { background: #FEE2E2; color: #DC2626; }
 
+        /* --- FORM & UPLOAD --- */
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text); }
         .form-control { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #E2E8F0; font-size: 14px; font-family: inherit; background: white; }
-        .hidden-input { position: absolute !important; width: 1px !important; height: 1px !important; overflow: hidden !important; clip: rect(0, 0, 0, 0) !important; }
-        .upload-label { display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px dashed #CBD5E1; border-radius: 16px; padding: 30px 20px; text-align: center; background: #F8FAFC; cursor: pointer; }
-        .upload-label i { font-size: 36px; color: #94A3B8; margin-bottom: 10px; }
+        textarea.form-control { resize: vertical; min-height: 80px; }
+        .hidden-input { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0, 0, 0, 0) !important; border: 0 !important; }
+        .upload-label { display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px dashed #CBD5E1; border-radius: 16px; padding: 30px 20px; text-align: center; background: #F8FAFC; cursor: pointer; transition: all 0.3s ease; }
+        .upload-label:hover { background: #F1F5F9; border-color: var(--primary); }
+        .upload-label i { font-size: 36px; color: #94A3B8; margin-bottom: 10px; transition: 0.3s; }
         .upload-label span { font-size: 13px; font-weight: 600; color: var(--text); }
         .upload-label.success { border-color: var(--primary); background: #F0FDF4; }
         .upload-label.success i { color: var(--primary); }
+        .upload-label.success span { color: var(--primary-dark); }
 
+        /* --- GALERI TABS & CARDS --- */
         .galeri-tabs { display: flex; background: white; border-radius: 12px; padding: 5px; margin-bottom: 20px; box-shadow: var(--shadow-sm);}
-        .g-tab { flex: 1; text-align: center; padding: 10px; font-weight: 700; font-size: 14px; color: var(--gray); border-radius: 8px; cursor: pointer; }
-        .g-tab.active { background: var(--primary); color: white; }
+        .g-tab { flex: 1; text-align: center; padding: 10px; font-weight: 700; font-size: 14px; color: var(--gray); border-radius: 8px; cursor: pointer; transition: 0.3s;}
+        .g-tab.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(0, 168, 107, 0.3); }
         .gallery-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .gallery-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-sm); }
+        .gallery-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-sm); display: flex; flex-direction: column;}
         .gallery-img { height: 110px; display: flex; justify-content: center; align-items: center; font-size: 40px; position: relative; }
-        .gallery-info { padding: 12px; }
-        .gallery-info h4 { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+        .gallery-info { padding: 12px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;}
+        .gallery-info h4 { font-size: 13px; font-weight: 700; margin-bottom: 4px; line-height: 1.3;}
         .gallery-info p { font-size: 11px; color: var(--gray); }
         .medal { position: absolute; top: 10px; right: 10px; font-size: 24px; }
 
+        /* --- HALAMAN PROFIL --- */
         .profile-header-card { background: white; border-radius: 24px; padding: 30px 20px; text-align: center; box-shadow: var(--shadow-sm); position: relative; overflow: hidden; margin-bottom: 20px; }
         .profile-header-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 80px; background: linear-gradient(135deg, var(--primary), #00C49A); z-index: 0; }
-        .profile-avatar { width: 100px; height: 100px; background: #E2E8F0; border-radius: 50%; margin: 0 auto 15px; display: flex; justify-content: center; align-items: center; font-size: 50px; color: #94A3B8; border: 4px solid white; position: relative; z-index: 1; }
+        .profile-avatar { width: 100px; height: 100px; background: #E2E8F0; border-radius: 50%; margin: 0 auto 15px; display: flex; justify-content: center; align-items: center; font-size: 50px; color: #94A3B8; border: 4px solid white; position: relative; z-index: 1; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .profile-header-card h2 { font-size: 20px; margin-bottom: 5px; position: relative; z-index: 1; }
-        .badge-kelas { background: rgba(0, 168, 107, 0.1); color: var(--primary); padding: 5px 15px; border-radius: 20px; font-size: 13px; font-weight: 700; display: inline-block; position: relative; z-index: 1; }
-        .btn-switch-role { background: #F8FAFC; color: var(--text); width: 100%; padding: 15px; border-radius: 16px; font-weight: 700; font-size: 14px; border: 1px dashed #CBD5E1; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 15px; }
-        .btn-logout { background: #FEE2E2; color: var(--danger); width: 100%; padding: 18px; border-radius: 16px; font-weight: 700; font-size: 15px; border: 1px solid #FCA5A5; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .profile-header-card .nisn { font-size: 13px; color: var(--gray); margin-bottom: 10px; position: relative; z-index: 1; }
+        .profile-header-card .badge-kelas { background: rgba(0, 168, 107, 0.1); color: var(--primary); padding: 5px 15px; border-radius: 20px; font-size: 13px; font-weight: 700; display: inline-block; position: relative; z-index: 1; }
+        .profile-stats { display: flex; gap: 10px; margin-bottom: 20px; }
+        .stat-box { flex: 1; background: white; padding: 15px; border-radius: 16px; text-align: center; box-shadow: var(--shadow-sm); }
+        .stat-box h3 { font-size: 18px; color: var(--primary); margin-bottom: 3px; }
+        .stat-box p { font-size: 11px; color: var(--gray); font-weight: 600; }
+        .profile-details { background: white; border-radius: 24px; padding: 20px; box-shadow: var(--shadow-sm); margin-bottom: 20px; }
+        .info-row { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px dashed #E2E8F0; font-size: 13px;}
+        .info-row:last-child { border-bottom: none; }
+        .info-row span:first-child { color: var(--gray); font-weight: 500; }
+        .info-row span:last-child { font-weight: 700; color: var(--text); text-align: right; }
+        
+        /* Tombol Ganti Role (Simulasi) */
+        .btn-switch-role { background: #F8FAFC; color: var(--text); width: 100%; padding: 15px; border-radius: 16px; font-weight: 700; font-size: 14px; border: 1px dashed #CBD5E1; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 15px; transition: 0.2s;}
+        .btn-switch-role:active { background: #E2E8F0; }
 
+        .btn-logout { background: #FEE2E2; color: var(--danger); width: 100%; padding: 18px; border-radius: 16px; font-weight: 700; font-size: 15px; border: 1px solid #FCA5A5; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.2s; }
+        .btn-logout:active { transform: scale(0.96); background: #FECACA; }
+
+        /* --- MODAL --- */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); opacity: 0; visibility: hidden; transition: 0.3s; z-index: 200; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
-        .modal-content { position: fixed; bottom: -100%; left: 0; right: 0; background: white; border-radius: 30px 30px 0 0; padding: 25px; transition: 0.3s; z-index: 201; max-height: 85vh; overflow-y: auto; }
+        .modal-content { position: fixed; bottom: -100%; left: 0; right: 0; background: white; border-radius: 30px 30px 0 0; padding: 25px; transition: 0.3s ease-out; z-index: 201; max-height: 85vh; overflow-y: auto; }
         .modal-content.active { bottom: 0; }
 
+        /* --- MODAL SCANNER KAMERA (BARU) --- */
         .scanner-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #000; z-index: 300; display: none; flex-direction: column; }
-        .scanner-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; color: white; }
+        .scanner-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; color: white; z-index: 301; }
+        .scanner-header h3 { font-size: 16px; font-weight: 600; }
         .btn-close-scanner { background: rgba(255,255,255,0.2); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; font-size: 24px; cursor: pointer; display: flex; justify-content: center; align-items: center; }
-        .scanner-body { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        #reader { width: 100%; max-width: 500px; }
-        .scanner-hint { color: white; text-align: center; margin-top: 20px; font-size: 14px; }
-
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; align-items: center; padding: 15px 10px; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); border-top-left-radius: 24px; border-top-right-radius: 24px; z-index: 100; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #94A3B8; font-size: 11px; font-weight: 600; cursor: pointer; gap: 4px;}
+        .scanner-body { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
+        #reader { width: 100%; max-width: 500px; border-radius: 20px; overflow: hidden; }
+        #reader__scan_region img { display: none; } 
+        .scanner-hint { color: white; text-align: center; margin-top: 20px; font-size: 14px; opacity: 0.8; }
+        
+        /* --- BOTTOM NAV --- */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); display: flex; justify-content: space-around; align-items: center; padding: 15px 10px; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); border-top-left-radius: 24px; border-top-right-radius: 24px; z-index: 100; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #94A3B8; font-size: 11px; font-weight: 600; cursor: pointer; transition: 0.2s; gap: 4px;}
         .nav-item i { font-size: 24px; }
         .nav-item.active { color: var(--primary); }
     </style>
 </head>
 <body>
 
+    <!-- CUSTOM TOAST -->
     <div id="customToast" class="toast">
         <i class='bx bx-check-circle toast-icon' id="toastIcon"></i>
         <span class="toast-text" id="toastMessage">Pesan</span>
     </div>
 
+    <!-- HEADER -->
     <div class="top-header">
         <div class="header-title">
             <i class='bx bx-chevron-left btn-back' id="btnBack" onclick="navigate('home')"></i>
+            <div class="school-logo" style="width: 35px; height: 35px; background: rgba(255,255,255,0.2); border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 10px;">LOGO</div>
             <span id="pageTitle">SIBHATIK</span>
         </div>
         <div class="clock-box">
@@ -139,7 +201,7 @@
     <!-- ================= 1. HOME ================= -->
     <div id="home" class="page active">
         <div class="profile-section">
-            <div class="avatar"><i class='bx bxs-user'></i></div>
+            <div class="avatar" id="homeAvatar"><i class='bx bxs-user'></i></div>
             <div class="profile-text">
                 <h4>Selamat Datang,</h4>
                 <h2 id="homeNama">ABID HANIF ABQARY</h2>
@@ -150,7 +212,7 @@
             <div class="grid-menu">
                 <div class="menu-item" onclick="navigate('presensi')"><div class="icon-box ic-purple"><i class='bx bxs-file-blank'></i></div><span>Presensi</span></div>
                 <div class="menu-item" onclick="navigate('laporan')"><div class="icon-box ic-orange"><i class='bx bxs-calendar-check'></i></div><span>Laporan<br>Presensi</span></div>
-                <div class="menu-item" onclick="navigate('ijin')"><div class="icon-box ic-yellow"><i class='bx bxs-info-circle'></i></div><span>Ijin</span></div>
+                <div class="menu-item" onclick="bukaIjinBaru()"><div class="icon-box ic-yellow"><i class='bx bxs-info-circle'></i></div><span>Ijin</span></div>
                 <div class="menu-item" onclick="navigate('galeri')"><div class="icon-box ic-green"><i class='bx bxs-trophy'></i></div><span>Galeri</span></div>
                 <div class="menu-item" onclick="navigate('presensi-kegiatan')"><div class="icon-box ic-purple"><i class='bx bxs-calendar-event'></i></div><span>Presensi<br>Kegiatan</span></div>
                 <div class="menu-item" onclick="navigate('laporan-kegiatan')"><div class="icon-box ic-orange"><i class='bx bxs-check-square'></i></div><span>Laporan<br>Kegiatan</span></div>
@@ -159,69 +221,264 @@
         </div>
     </div>
 
-    <!-- ================= 2. PRESENSI ================= -->
+    <!-- ================= 2. PRESENSI HARIAN (ROLE BASED) ================= -->
     <div id="presensi" class="page">
         <div class="content-container">
+            
+            <!-- ====== UI SISWA (SCAN & GEOFENCE) ====== -->
             <div id="uiSiswa">
-                <div class="geofence-box">
-                    <div class="loc-status"><i class='bx bx-current-location'></i> <span>Di Dalam Area Sekolah</span></div>
+                <div class="geofence-box" id="geoBox">
+                    <div class="loc-status inside" id="locStatus">
+                        <i class='bx bx-current-location'></i> <span id="locText">Memeriksa Lokasi...</span>
+                    </div>
                     <div class="big-clock" id="liveClock">00:00:00</div>
+                    <p style="font-size: 12px; color: var(--gray);" id="locDetail">Menghubungkan ke GPS...</p>
                 </div>
                 <div class="btn-grid">
-                    <button class="btn-masuk" onclick="absenManual('Masuk')"><i class='bx bx-log-in-circle' style="font-size: 24px;"></i> <span>Presensi Masuk</span></button>
-                    <button class="btn-pulang" onclick="absenManual('Pulang')"><i class='bx bx-log-out-circle' style="font-size: 24px;"></i> <span>Presensi Pulang</span></button>
+                    <button class="btn-masuk" id="btnMasuk" onclick="absen('Masuk')">
+                        <i class='bx bx-log-in-circle' style="font-size: 24px;"></i> 
+                        <span>Presensi Masuk</span>
+                        <span style="font-size: 10px; font-weight: normal;" id="timeMasuk">-</span>
+                    </button>
+                    <button class="btn-pulang" id="btnPulang" onclick="absen('Pulang')">
+                        <i class='bx bx-log-out-circle' style="font-size: 24px;"></i> 
+                        <span>Presensi Pulang</span>
+                        <span style="font-size: 10px; font-weight: normal;" id="timePulang">-</span>
+                    </button>
                 </div>
-                <button class="btn-qr" onclick="bukaScanner()"><i class='bx bx-qr-scan' style="font-size: 20px;"></i> Scan QR Code Presensi</button>
+                <!-- TOMBOL SCAN QR (SUDAH DIUBAH KE FUNGSI KAMERA) -->
+                <button class="btn-qr" onclick="bukaScanner()">
+                    <i class='bx bx-qr-scan' style="font-size: 20px;"></i> Scan QR Code Presensi
+                </button>
             </div>
 
+            <!-- ====== UI GURU (GENERATE QR) ====== -->
             <div id="uiGuru" style="display: none;">
                 <div class="qr-container">
-                    <h3>QR Presensi Kelas</h3>
-                    <div class="qr-wrapper"><div id="qrcode"></div></div>
+                    <h3>QR Presensi Kelas X-B</h3>
+                    <p>Tunjukkan QR ini ke siswa. Refresh setiap 5 menit.</p>
+                    
+                    <div class="qr-wrapper">
+                        <div id="qrcode"></div>
+                    </div>
+                    
                     <div class="qr-timer" id="qrTimer">05:00</div>
-                    <button class="btn-action" onclick="generateQR()"><i class='bx bx-refresh'></i> Generate QR Baru</button>
+                    
+                    <button class="btn-action" onclick="generateQR()">
+                        <i class='bx bx-refresh'></i> Generate QR Baru
+                    </button>
+                </div>
+                
+                <div class="geofence-box" style="border-color: #F59E0B; background: #FFFBEB;">
+                    <h4 style="color: #D97706; font-size: 14px; margin-bottom: 5px;"><i class='bx bx-info-circle'></i> Info Guru</h4>
+                    <p style="font-size: 12px; color: #92400E;">QR Code ini terhubung langsung dengan database kehadiran. Siswa yang scan akan otomatis tercatat Hadir.</p>
                 </div>
             </div>
+
         </div>
     </div>
 
-    <!-- ================= 3. LAPORAN PRESENSI ================= -->
+    <!-- ================= 3. LAPORAN HARIAN ================= -->
     <div id="laporan" class="page">
         <div class="content-container">
-            <!-- Data akan di-inject lewat JavaScript di sini -->
-            <div id="listLaporan">
-                <div class="history-card" style="justify-content: center; color: var(--gray); font-size: 14px;">Belum ada data presensi.</div>
+            <div class="history-card">
+                <div>
+                    <div style="font-size: 14px; font-weight: 700;">Senin, 21 Okt 2024</div>
+                    <div style="font-size: 12px; color: var(--gray); margin-top: 4px;">Masuk: 07:02:15 | Pulang: 15:30:00</div>
+                </div>
+                <div class="status-badge bg-green">Hadir</div>
+            </div>
+            <div class="history-card" style="border: 2px solid #FEE2E2;">
+                <div>
+                    <div style="font-size: 14px; font-weight: 700;">Kamis, 17 Okt 2024</div>
+                    <div style="font-size: 12px; color: var(--gray); margin-top: 4px;">Sakit (Surat Dokter Terlampir)</div>
+                </div>
+                <button class="btn-edit" onclick="editIzin()" style="background: #F1F5F9; padding: 6px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid #E2E8F0;">
+                    <i class='bx bx-edit-alt'></i> Edit
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- ================= SISA HALAMAN (KEGIATAN, IJIN, GALERI, PROFIL, MODAL) ================= -->
-    <!-- (Gw ringkas di sini biar fokus ke fungsionalitas, struktur aslinya tetap sama) -->
-    <div id="presensi-kegiatan" class="page"><div class="content-container"><h3>Event Sekolah</h3><div class="event-card"><h3>Bedhol BWKS</h3><button class="btn-small" onclick="bukaScanner()"><i class='bx bx-qr-scan'></i> Scan Kehadiran</button></div></div></div>
-    <div id="laporan-kegiatan" class="page"><div class="content-container"><h3>Laporan G7KAIH</h3></div></div>
-    <div id="ijin" class="page"><div class="content-container"><form onsubmit="event.preventDefault(); showToast('Data Ijin Disimpan!');"><div class="form-group"><textarea class="form-control" placeholder="Alasan izin..." required></textarea></div><button type="submit" class="btn-action">Kirim</button></form></div></div>
-    
+    <!-- ================= 4. PRESENSI KEGIATAN ================= -->
+    <div id="presensi-kegiatan" class="page">
+        <div class="content-container">
+            <h3 style="margin-bottom: 15px; font-size: 16px;">Event & Kegiatan Sekolah</h3>
+            <div class="event-card">
+                <div class="event-badge">Hari Ini</div>
+                <h3>Bedhol BWKS</h3>
+                <p><i class='bx bx-map'></i> Lapangan Utama | <i class='bx bx-time'></i> 08:00 - Selesai</p>
+                <button class="btn-small" onclick="bukaScanner()"><i class='bx bx-qr-scan'></i> Scan Kehadiran</button>
+            </div>
+            <div class="event-card">
+                <h3>PSCS (Pekan Seni & Class Meeting)</h3>
+                <p><i class='bx bx-map'></i> Aula & Kelas | <i class='bx bx-time'></i> 07:30 - 14:00</p>
+                <button class="btn-small" onclick="bukaScanner()"><i class='bx bx-qr-scan'></i> Scan Kehadiran</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 5. LAPORAN KEGIATAN (G7KAIH) ================= -->
+    <div id="laporan-kegiatan" class="page">
+        <div class="content-container">
+            <div style="background: linear-gradient(135deg, #3B82F6, #8B5CF6); border-radius: 16px; padding: 20px; color: white; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);">
+                <h2 style="font-size: 18px; margin-bottom: 5px;">Laporan G7KAIH</h2>
+                <p style="font-size: 12px; opacity: 0.9;">Gerakan 7 Anak Indonesia Hebat</p>
+            </div>
+            <div class="history-card" style="border-left: 4px solid #3B82F6;">
+                <div>
+                    <div style="font-size: 14px; font-weight: 700;">Bedhol BWKS</div>
+                    <div style="font-size: 12px; color: var(--gray); margin-top: 4px;">20 Okt 2024 | 08:15 WIB</div>
+                </div>
+                <div class="status-badge bg-green">Hadir</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 6. FORM IJIN ================= -->
+    <div id="ijin" class="page">
+        <div class="content-container">
+            <div id="editAlert" style="display: none; background: #FEF3C7; color: #D97706; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 600; margin-bottom: 15px;">
+                <i class='bx bx-info-circle'></i> Anda sedang mengedit surat izin sebelumnya.
+            </div>
+            <form onsubmit="event.preventDefault(); showToast('Data Ijin Disimpan!'); navigate('laporan');">
+                <div class="form-group">
+                    <label>Jenis Pengajuan</label>
+                    <select class="form-control" id="editJenis">
+                        <option>Izin (Ada keperluan)</option>
+                        <option selected>Sakit (Wajib Upload Surat)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tanggal</label>
+                    <input type="date" class="form-control" id="editTanggal" value="2024-10-17" required>
+                </div>
+                <div class="form-group">
+                    <label>Alasan / Keterangan</label>
+                    <textarea class="form-control" id="editAlasan" required>Demam tinggi, disarankan istirahat oleh dokter.</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Upload Surat (JPG/PDF)</label>
+                    <input type="file" id="fileUpload" class="hidden-input" accept="image/*, .pdf" onchange="handleFileUpload(this)">
+                    <label for="fileUpload" class="upload-label" id="uploadBox">
+                        <i class='bx bx-cloud-upload' id="uploadIcon"></i>
+                        <span id="uploadText">Ketuk untuk memilih file</span>
+                    </label>
+                </div>
+                <button type="submit" class="btn-action" id="btnSubmitIzin">Kirim Pengajuan Ijin</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= 7. GALERI ================= -->
     <div id="galeri" class="page">
         <div class="content-container">
-            <div class="galeri-tabs"><div class="g-tab active">Prestasi</div><div class="g-tab">Karya</div></div>
-            <div class="gallery-grid"><div class="gallery-card"><div class="gallery-img" style="background: #DBEAFE; color: #2563EB;"><i class='bx bx-code-alt'></i><span class="medal">🥇</span></div><div class="gallery-info"><h4>Juara 1 Web Design</h4></div></div></div>
+            <div class="galeri-tabs">
+                <div class="g-tab active" onclick="switchTab('prestasi')" id="tab-prestasi">Prestasi</div>
+                <div class="g-tab" onclick="switchTab('karya')" id="tab-karya">Karya Siswa</div>
+            </div>
+            <div id="content-prestasi">
+                <div class="gallery-grid">
+                    <div class="gallery-card">
+                        <div class="gallery-img" style="background: #DBEAFE; color: #2563EB;">
+                            <i class='bx bx-code-alt'></i><span class="medal">🥇</span>
+                        </div>
+                        <div class="gallery-info"><div><h4>Juara 1 Web Design</h4><p>Tingkat Provinsi</p></div></div>
+                    </div>
+                </div>
+                <button class="btn-action" onclick="openModal('prestasi')" style="margin-top: 20px;"><i class='bx bx-plus'></i> Tambah Prestasi</button>
+            </div>
+            <div id="content-karya" style="display: none;">
+                <div class="gallery-grid">
+                    <div class="gallery-card">
+                        <div class="gallery-img" style="background: #F3E8FF; color: #9333EA;"><i class='bx bx-code-block'></i></div>
+                        <div class="gallery-info"><div><h4>Aplikasi Kasir</h4><p>Karya Kode</p></div></div>
+                    </div>
+                </div>
+                <button class="btn-action" onclick="openModal('karya')" style="margin-top: 20px;"><i class='bx bx-plus'></i> Tambah Karya</button>
+            </div>
         </div>
     </div>
 
+    <!-- ================= 8. PROFIL (ROLE SWITCHER) ================= -->
     <div id="profil" class="page">
         <div class="content-container">
-            <div class="profile-header-card"><div class="profile-avatar"><i class='bx bxs-user'></i></div><h2 id="profileNama">ABID HANIF ABQARY</h2><div class="badge-kelas" id="profileKelas">Kelas X-B</div></div>
-            <button class="btn-switch-role" onclick="toggleRole()"><i class='bx bx-sync'></i> <span id="roleSwitchText">Simulasi: Ganti ke Akun Guru</span></button>
-            <button class="btn-logout" onclick="showToast('Logout!', 'error')"><i class='bx bx-log-out'></i> Keluar Akun</button>
+            <div class="profile-header-card">
+                <div class="profile-avatar" id="profileAvatar"><i class='bx bxs-user'></i></div>
+                <h2 id="profileNama">ABID HANIF ABQARY</h2>
+                <p class="nisn" id="profileNisn">NISN: 0051234567</p>
+                <div class="badge-kelas" id="profileKelas">Kelas X-B | MIPA</div>
+            </div>
+
+            <!-- TOMBOL SIMULASI GANTI ROLE -->
+            <button class="btn-switch-role" onclick="toggleRole()">
+                <i class='bx bx-sync'></i> <span id="roleSwitchText">Simulasi: Ganti ke Akun Guru</span>
+            </button>
+
+            <div class="profile-stats" id="profileStats">
+                <div class="stat-box"><h3>98%</h3><p>Kehadiran</p></div>
+                <div class="stat-box"><h3>12</h3><p>Total Ijin</p></div>
+                <div class="stat-box"><h3>5</h3><p>Prestasi</p></div>
+            </div>
+
+            <div class="profile-details" id="profileDetails">
+                <div class="info-row"><span>Tempat, Tanggal Lahir</span><span>Malang, 17 Agustus 2008</span></div>
+                <div class="info-row"><span>Jenis Kelamin</span><span>Laki-laki</span></div>
+                <div class="info-row"><span>Alamat</span><span>Jl. Merdeka No. 123, Malang</span></div>
+                <div class="info-row"><span>Wali Kelas</span><span>Bpk. Budi Santoso, S.Pd</span></div>
+            </div>
+
+            <button class="btn-logout" onclick="showToast('Berhasil Logout!', 'error')">
+                <i class='bx bx-log-out'></i> Keluar Akun (Logout)
+            </button>
         </div>
     </div>
 
-    <!-- SCANNER MODAL -->
-    <div class="scanner-modal" id="scannerModal">
-        <div class="scanner-header"><h3>Scan QR Presensi</h3><button class="btn-close-scanner" onclick="tutupScanner()"><i class='bx bx-x'></i></button></div>
-        <div class="scanner-body"><div id="reader"></div><p class="scanner-hint">Arahkan kamera ke QR Code Guru.</p></div>
+    <!-- ================= MODAL TAMBAH DATA ================= -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
+    <div class="modal-content" id="modalPrestasi">
+        <h3 style="margin-bottom: 15px;">Tambah Prestasi</h3>
+        <form onsubmit="event.preventDefault(); tambahPrestasi();">
+            <div class="form-group"><label>Nama Lomba / Prestasi</label><input type="text" class="form-control" required></div>
+            <div class="form-group"><label>Jenis Lomba</label><select class="form-control"><option>Sains</option><option>Olahraga</option><option>Seni</option><option>Teknologi</option></select></div>
+            <div class="form-group"><label>Medali / Juara</label><select class="form-control"><option>Juara 1 (Emas)</option><option>Juara 2 (Perak)</option><option>Juara 3 (Perunggu)</option></select></div>
+            <button type="submit" class="btn-action">Simpan Prestasi</button>
+        </form>
     </div>
 
+    <div class="modal-content" id="modalKarya">
+        <h3 style="margin-bottom: 15px;">Tambah Karya</h3>
+        <form onsubmit="event.preventDefault(); tambahKarya();">
+            <div class="form-group"><label>Judul Karya</label><input type="text" class="form-control" required></div>
+            <div class="form-group"><label>Tipe Karya</label><select class="form-control" id="tipeKarya" onchange="ubahFormKarya()"><option value="foto">Foto / Gambar</option><option value="teks">Teks / Puisi</option><option value="kode">Kode Program</option></select></div>
+            <div class="form-group" id="formFoto">
+                <label>Upload Foto Karya</label>
+                <input type="file" id="fotoKarya" class="hidden-input" accept="image/*" onchange="handleFileUploadKarya(this)">
+                <label for="fotoKarya" class="upload-label" id="uploadBoxKarya">
+                    <i class='bx bx-image-add' id="uploadIconKarya"></i>
+                    <span id="uploadTextKarya">Ketuk untuk memilih gambar</span>
+                </label>
+            </div>
+            <div class="form-group" id="formTeks" style="display: none;"><label>Isi Teks</label><textarea class="form-control"></textarea></div>
+            <div class="form-group" id="formKode" style="display: none;"><label>Kode Program</label><textarea class="form-control" style="font-family: monospace;"></textarea></div>
+            <button type="submit" class="btn-action">Simpan Karya</button>
+        </form>
+    </div>
+
+    <!-- ================= MODAL SCANNER KAMERA (BARU) ================= -->
+    <div class="scanner-modal" id="scannerModal">
+        <div class="scanner-header">
+            <h3>Scan QR Presensi</h3>
+            <button class="btn-close-scanner" onclick="tutupScanner()"><i class='bx bx-x'></i></button>
+        </div>
+        <div class="scanner-body">
+            <!-- Div ini bakal diisi video dari kamera -->
+            <div id="reader"></div>
+            <p class="scanner-hint">Arahkan kamera ke QR Code yang ditunjukkan Guru.</p>
+        </div>
+    </div>
+
+    <!-- ================= BOTTOM NAV ================= -->
     <div class="bottom-nav">
         <div class="nav-item active" onclick="navigate('home')" id="nav-home"><i class='bx bxs-home'></i> Home</div>
         <div class="nav-item" onclick="navigate('laporan')" id="nav-laporan"><i class='bx bx-history'></i> Riwayat</div>
@@ -230,16 +487,19 @@
     </div>
 
     <script>
-        let userRole = 'siswa'; 
+        // --- STATE GLOBAL ---
+        let userRole = 'siswa'; // 'siswa' atau 'guru'
         let qrInterval;
-        let timeLeft = 300;
-        let html5QrCode = null; 
+        let timeLeft = 300; // 5 menit dalam detik
+        let html5QrCode = null; // Variabel buat nyimpen instance kamera
 
+        // --- 1. CUSTOM TOAST ---
         let toastTimeout;
         function showToast(message, type = 'success') {
             const toast = document.getElementById('customToast');
             const icon = document.getElementById('toastIcon');
-            document.getElementById('toastMessage').innerText = message;
+            const text = document.getElementById('toastMessage');
+            text.innerText = message;
             if (type === 'error') { toast.classList.add('error'); icon.className = 'bx bx-error-circle toast-icon'; } 
             else { toast.classList.remove('error'); icon.className = 'bx bx-check-circle toast-icon'; }
             toast.classList.add('show');
@@ -247,46 +507,167 @@
             toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 3000);
         }
 
+        // --- 2. NAVIGASI ---
         function navigate(pageId) {
             document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
-            document.getElementById('btnBack').style.display = pageId === 'home' ? 'none' : 'block';
+            
+            const title = document.getElementById('pageTitle');
+            const btnBack = document.getElementById('btnBack');
+            const titles = { 
+                'home': 'SIBHATIK', 'presensi': 'Presensi', 'laporan': 'Laporan Presensi', 
+                'ijin': 'Form Ijin', 'galeri': 'Galeri Siswa', 'profil': 'Profil',
+                'presensi-kegiatan': 'Presensi Kegiatan', 'laporan-kegiatan': 'Laporan G7KAIH'
+            };
+            
+            title.innerText = titles[pageId] || 'SIBHATIK';
+            btnBack.style.display = pageId === 'home' ? 'none' : 'block';
+            
             document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
             const navMap = { 'home': 'nav-home', 'laporan': 'nav-laporan', 'galeri': 'nav-galeri', 'profil': 'nav-profil' };
             if(navMap[pageId]) document.getElementById(navMap[pageId]).classList.add('active');
             window.scrollTo(0, 0);
 
-            if(pageId === 'presensi') renderPresensiUI();
-            if(pageId === 'laporan') renderLaporan(); // Load data pas buka laporan
+            if(pageId === 'presensi') {
+                renderPresensiUI();
+            }
         }
 
+        // --- 3. SISTEM ROLE (GURU VS SISWA) ---
         function toggleRole() {
             userRole = userRole === 'siswa' ? 'guru' : 'siswa';
-            document.getElementById('roleSwitchText').innerText = userRole === 'siswa' ? "Simulasi: Ganti ke Akun Guru" : "Simulasi: Ganti ke Akun Siswa";
-            document.getElementById('homeNama').innerText = userRole === 'siswa' ? "ABID HANIF" : "Bpk. Budi Santoso";
-            document.getElementById('profileNama').innerText = userRole === 'siswa' ? "ABID HANIF" : "Bpk. Budi Santoso";
-            showToast(`Beralih ke Mode ${userRole.toUpperCase()}`);
-            if(document.getElementById('presensi').classList.contains('active')){ renderPresensiUI(); }
+            
+            const roleText = document.getElementById('roleSwitchText');
+            const homeNama = document.getElementById('homeNama');
+            const homeKelas = document.getElementById('homeKelas');
+            const profileNama = document.getElementById('profileNama');
+            const profileKelas = document.getElementById('profileKelas');
+
+            if (userRole === 'guru') {
+                roleText.innerText = "Simulasi: Ganti ke Akun Siswa";
+                homeNama.innerText = "Bpk. Budi Santoso";
+                homeKelas.innerText = "Guru Pengampu | X-B";
+                profileNama.innerText = "Bpk. Budi Santoso, S.Pd";
+                profileKelas.innerText = "Wali Kelas X-B";
+                document.getElementById('profileStats').style.display = 'none';
+                showToast('Berhasil beralih ke Mode Guru!', 'success');
+            } else {
+                roleText.innerText = "Simulasi: Ganti ke Akun Guru";
+                homeNama.innerText = "ABID HANIF ABQARY";
+                homeKelas.innerText = "Kelas : X-B";
+                profileNama.innerText = "ABID HANIF ABQARY";
+                profileKelas.innerText = "Kelas X-B | MIPA";
+                document.getElementById('profileStats').style.display = 'flex';
+                showToast('Berhasil beralih ke Mode Siswa!', 'success');
+            }
+
+            if(document.getElementById('presensi').classList.contains('active')){
+                renderPresensiUI();
+            }
         }
 
         function renderPresensiUI() {
-            document.getElementById('uiSiswa').style.display = userRole === 'siswa' ? 'block' : 'none';
-            document.getElementById('uiGuru').style.display = userRole === 'guru' ? 'block' : 'none';
-            if (userRole === 'guru') generateQR();
+            const uiSiswa = document.getElementById('uiSiswa');
+            const uiGuru = document.getElementById('uiGuru');
+
+            if (userRole === 'siswa') {
+                uiSiswa.style.display = 'block';
+                uiGuru.style.display = 'none';
+                checkGeofence();
+            } else {
+                uiSiswa.style.display = 'none';
+                uiGuru.style.display = 'block';
+                generateQR();
+            }
         }
 
-        // --- KAMERA & SCANNER LOGIC ---
+        // --- 4. JAM & SAPAAN ---
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('jam').innerText = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            const hour = now.getHours();
+            let sapaan = hour >= 4 && hour < 11 ? "Selamat Pagi" : hour >= 11 && hour < 15 ? "Selamat Siang" : hour >= 15 && hour < 18 ? "Selamat Sore" : "Selamat Malam";
+            document.getElementById('sapaan').innerText = sapaan;
+        }
+        setInterval(updateClock, 1000); updateClock();
+
+        // --- 5. LOGIKA GURU: GENERATE QR ---
+        function generateQR() {
+            document.getElementById("qrcode").innerHTML = "";
+            let token = "PRESENSI-" + Math.random().toString(36).substring(2, 8).toUpperCase() + "-XB";
+            new QRCode(document.getElementById("qrcode"), {
+                text: token, width: 200, height: 200, colorDark : "#1E293B", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H
+            });
+
+            clearInterval(qrInterval);
+            timeLeft = 300;
+            updateQrTimer();
+            qrInterval = setInterval(() => {
+                timeLeft--;
+                updateQrTimer();
+                if (timeLeft <= 0) {
+                    clearInterval(qrInterval);
+                    showToast("QR Code kedaluwarsa. Silakan generate ulang.", "error");
+                    document.getElementById("qrcode").innerHTML = `<div style="padding: 50px; color: #EF4444; font-weight: bold;">EXPIRED</div>`;
+                }
+            }, 1000);
+        }
+
+        function updateQrTimer() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('qrTimer').innerText = `0${minutes}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        // --- 6. LOGIKA SISWA: PRESENSI HARIAN & GEOFENCE ---
+        function updateLiveClock() {
+            const now = new Date();
+            document.getElementById('liveClock').innerText = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+        }
+        setInterval(updateLiveClock, 1000);
+
+        let isInsideSchool = true;
+        function checkGeofence() {
+            const box = document.getElementById('geoBox');
+            const status = document.getElementById('locStatus');
+            const btnMasuk = document.getElementById('btnMasuk');
+            const btnPulang = document.getElementById('btnPulang');
+            if (isInsideSchool) {
+                box.classList.remove('outside'); status.className = 'loc-status inside';
+                status.innerHTML = `<i class='bx bx-current-location'></i> <span>Di Dalam Area Sekolah</span>`;
+                btnMasuk.classList.remove('btn-disabled'); btnPulang.classList.remove('btn-disabled');
+            } else {
+                box.classList.add('outside'); status.className = 'loc-status outside';
+                status.innerHTML = `<i class='bx bx-error-circle'></i> <span>Di Luar Area Sekolah</span>`;
+                btnMasuk.classList.add('btn-disabled'); btnPulang.classList.add('btn-disabled');
+            }
+        }
+        setTimeout(checkGeofence, 500);
+
+        function absen(tipe) {
+            if (!isInsideSchool) return showToast("Gagal: Anda di luar area sekolah!", "error");
+            const now = new Date();
+            const timeString = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+            if (tipe === 'Masuk') {
+                document.getElementById('timeMasuk').innerText = `Pukul ${timeString}`;
+                showToast(`Presensi Masuk: ${timeString}`);
+            } else {
+                document.getElementById('timePulang').innerText = `Pukul ${timeString}`;
+                showToast(`Presensi Pulang: ${timeString}`);
+            }
+        }
+
+        // --- 7. FUNGSI KAMERA SCANNER (BARU) ---
         function bukaScanner() {
-            // Tampilkan loading / UI scanner
+            // Tampilkan modal full screen hitam
             document.getElementById('scannerModal').style.display = 'flex';
             
-            // 1. CEK IZIN KAMERA SECARA EKSPLISIT
+            // Minta izin kamera secara eksplisit
             Html5Qrcode.getCameras().then(devices => {
                 if (devices && devices.length) {
-                    // 2. IZIN DIBERIKAN, JALANKAN SCANNER
                     html5QrCode = new Html5Qrcode("reader");
                     html5QrCode.start(
-                        { facingMode: "environment" }, 
+                        { facingMode: "environment" }, // Pakai kamera belakang
                         { fps: 10, qrbox: 250 },
                         onScanSuccess
                     ).catch(err => {
@@ -295,97 +676,106 @@
                     });
                 }
             }).catch(err => {
-                // 3. IZIN DITOLAK ATAU ERROR
                 showToast("Izin kamera ditolak! Harap izinkan kamera di browser.", 'error');
                 tutupScanner();
             });
         }
 
         function onScanSuccess(decodedText, decodedResult) {
-            tutupScanner(); // Matikan kamera
-            catatPresensi('Hadir'); // Simpan data
+            // Matikan kamera kalau udah berhasil scan
+            tutupScanner();
+            
+            // Simulasi: Kalau scan berhasil, otomatis isi jam masuk
+            const now = new Date();
+            const timeString = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+            document.getElementById('timeMasuk').innerText = `Pukul ${timeString}`;
+            
+            showToast(`Scan Berhasil! Presensi Tercatat pada ${timeString}`);
         }
 
         function tutupScanner() {
             document.getElementById('scannerModal').style.display = 'none';
             if (html5QrCode) {
-                html5QrCode.stop().then(() => { document.getElementById('reader').innerHTML = ""; html5QrCode = null; }).catch(e => console.log(e));
+                html5QrCode.stop().then(() => {
+                    document.getElementById('reader').innerHTML = "";
+                    html5QrCode = null;
+                }).catch(err => console.log("Gagal stop kamera", err));
             }
         }
 
-        // --- PENYIMPANAN DATA (LOCAL STORAGE) ---
-        function catatPresensi(status) {
-            const now = new Date();
-            const dateString = now.toLocaleDateString('id-ID'); // Format: 24/10/2024
-            const timeString = now.toLocaleTimeString('id-ID'); // Format: 07.15.30
+        // --- 8. IJIN & UPLOAD ---
+        function bukaIjinBaru() {
+            navigate('ijin');
+            document.getElementById('editAlert').style.display = 'none';
+            document.getElementById('btnSubmitIzin').innerText = "Kirim Pengajuan Ijin";
+            document.getElementById('editAlasan').value = ""; document.getElementById('editTanggal').value = "";
+            document.getElementById('uploadBox').classList.remove('success');
+            document.getElementById('uploadText').innerText = "Ketuk untuk memilih file";
+            document.getElementById('uploadIcon').className = 'bx bx-cloud-upload';
+        }
 
-            // Ambil data lama dari LocalStorage (kalau ada)
-            let dataPresensi = JSON.parse(localStorage.getItem('dataPresensiSiswa')) || [];
+        function editIzin() {
+            navigate('ijin');
+            document.getElementById('editAlert').style.display = 'block';
+            document.getElementById('btnSubmitIzin').innerText = "Simpan Perubahan Izin";
+            document.getElementById('editAlasan').value = "Demam tinggi, disarankan istirahat dokter.";
+        }
 
-            // Cek apakah hari ini udah pernah absen
-            let sudahAbsen = dataPresensi.find(item => item.tanggal === dateString);
-
-            if (sudahAbsen) {
-                showToast(`Anda sudah presensi hari ini pada ${sudahAbsen.jam}`, 'error');
-                return;
+        function handleFileUpload(input) {
+            if (input.files && input.files[0]) {
+                let fileName = input.files[0].name;
+                if(fileName.length > 25) fileName = fileName.substring(0, 25) + '...';
+                document.getElementById('uploadBox').classList.add('success');
+                document.getElementById('uploadText').innerHTML = `<b>${fileName}</b> terpilih`;
+                document.getElementById('uploadIcon').className = 'bx bx-check-circle';
+                showToast('File berhasil dipilih!');
             }
-
-            // Simpan data baru
-            const dataBaru = { tanggal: dateString, jam: timeString, status: status };
-            dataPresensi.push(dataBaru);
-            localStorage.setItem('dataPresensiSiswa', JSON.stringify(dataPresensi));
-
-            // Kasih feedback sukses
-            showToast(`Presensi Berhasil! Tercatat pada ${timeString}`, 'success');
-            
-            // Refresh tampilan laporan
-            renderLaporan();
         }
 
-        function absenManual(tipe) {
-            catatPresensi('Hadir (Manual)');
-        }
-
-        // --- LOAD DATA LAPORAN ---
-        function renderLaporan() {
-            let dataPresensi = JSON.parse(localStorage.getItem('dataPresensiSiswa')) || [];
-            const container = document.getElementById('listLaporan');
-
-            if (dataPresensi.length === 0) {
-                container.innerHTML = `<div class="history-card" style="justify-content: center; color: var(--gray); font-size: 14px;">Belum ada data presensi.</div>`;
-                return;
+        function handleFileUploadKarya(input) {
+            if (input.files && input.files[0]) {
+                let fileName = input.files[0].name;
+                if(fileName.length > 25) fileName = fileName.substring(0, 25) + '...';
+                document.getElementById('uploadBoxKarya').classList.add('success');
+                document.getElementById('uploadTextKarya').innerHTML = `<b>${fileName}</b> terpilih`;
+                document.getElementById('uploadIconKarya').className = 'bx bx-check-circle';
+                showToast('Gambar karya terpilih!');
             }
-
-            container.innerHTML = '';
-            // Urutkan dari yang terbaru
-            dataPresensi.reverse().forEach(item => {
-                container.innerHTML += `
-                    <div class="history-card">
-                        <div>
-                            <div style="font-size: 14px; font-weight: 700;">${item.tanggal}</div>
-                            <div style="font-size: 12px; color: var(--gray); margin-top: 4px;">Pukul: ${item.jam} WIB</div>
-                        </div>
-                        <div class="status-badge bg-green">${item.status}</div>
-                    </div>
-                `;
-            });
         }
 
-        // --- UTILS ---
-        function generateQR() {
-            document.getElementById("qrcode").innerHTML = "";
-            new QRCode(document.getElementById("qrcode"), { text: "TOKEN-XB", width: 200, height: 200 });
+        // --- 9. GALERI ---
+        function switchTab(tab) {
+            document.querySelectorAll('.g-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(`tab-${tab}`).classList.add('active');
+            if(tab === 'prestasi') {
+                document.getElementById('content-prestasi').style.display = 'block';
+                document.getElementById('content-karya').style.display = 'none';
+            } else {
+                document.getElementById('content-prestasi').style.display = 'none';
+                document.getElementById('content-karya').style.display = 'block';
+            }
         }
-        
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('jam').innerText = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-            document.getElementById('liveClock').innerText = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-        }
-        setInterval(updateClock, 1000); updateClock();
 
-        // Load laporan pertama kali
-        renderLaporan();
+        function openModal(type) {
+            document.getElementById('modalOverlay').classList.add('active');
+            if(type === 'prestasi') document.getElementById('modalPrestasi').classList.add('active');
+            else document.getElementById('modalKarya').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            document.querySelectorAll('.modal-content').forEach(m => m.classList.remove('active'));
+        }
+
+        function ubahFormKarya() {
+            const tipe = document.getElementById('tipeKarya').value;
+            document.getElementById('formFoto').style.display = tipe === 'foto' ? 'block' : 'none';
+            document.getElementById('formTeks').style.display = tipe === 'teks' ? 'block' : 'none';
+            document.getElementById('formKode').style.display = tipe === 'kode' ? 'block' : 'none';
+        }
+
+        function tambahPrestasi() { showToast('Prestasi berhasil ditambahkan!'); closeModal(); }
+        function tambahKarya() { showToast('Karya berhasil diunggah!'); closeModal(); }
     </script>
 </body>
 </html>
